@@ -43,6 +43,14 @@ session_start();
 
 		{!! Form::submit('Them moi')!!}
 	{!! Form::close() !!}
+
+  @if ( $errors->any() )
+    <ul>
+      @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul> 
+  @endif
 	
 </html>
 

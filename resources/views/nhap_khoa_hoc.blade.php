@@ -7,24 +7,20 @@ session_start();
  
 @section('content')
 <html>
-<h1>Đăng nhập</h1>
 	{!! Form::open() !!}
- 		{!! Form::label('name','Name:') !!}
-  		{!! Form::text('name') !!} </br>
+ 		{!! Form::label('khoa_hoc','Khóa học:', ['class' => 'khoa_hoc']) !!} </br>
+		{!! Form::textarea('khoa_hoc') !!}</br>
+	 	
 
-		{!! Form::label('password','Password:') !!}
-		{!! Form::password('password', ['id' => 'password']) !!} </br>
-
-		{!! Form::submit('Them moi')!!}
+		{!! Form::submit('Nhập')!!}
 	{!! Form::close() !!}
-	
-</html>
 
-@if ( $errors->any() )
+	@if ( $errors->any() )
     <ul>
       @foreach ($errors->all() as $error)
         <li>{{ $error }}</li>
       @endforeach
     </ul> 
   @endif
+</html>
 @stop

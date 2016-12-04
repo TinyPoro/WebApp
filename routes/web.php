@@ -45,6 +45,20 @@ Route::post('/search', 'dtbController@show');
 
 Route::get('/search', 'dtbController@search');
 
+Route::post('/nhap_khoa_hoc', 'dtbController@cap_nhat_khoa_hoc');
+
+Route::get('/nhap_khoa_hoc', 'dtbController@nhap_khoa_hoc');
+
+Route::post('/nhap_ctdt', 'dtbController@cap_nhat_ctdt');
+
+Route::get('/nhap_ctdt', 'dtbController@nhap_ctdt');
+
+
+
+Route::get('/test', 'dtbController@getTest');
+
+Route::post('test', ['as'=>'test', 'uses' => 'dtbController@postTest']);
+
 
 
 

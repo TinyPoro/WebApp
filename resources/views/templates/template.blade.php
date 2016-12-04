@@ -85,7 +85,7 @@
         $sql = "SELECT * FROM tai_khoan WHERE id = $id";
         $result = $conn -> query($sql);
         $row = $result -> fetch_assoc();
-        $username = $row['name'];
+        $username = $row['username'];
         echo "<li><a href=\"#\"><span class='glyphicon glyphicon-user'></span> ". $username."</a></li>";
         echo "<li><a href=\"logout\"><span class='glyphicon glyphicon-log-in'></span> Đăng xuất</a></li>";
       }

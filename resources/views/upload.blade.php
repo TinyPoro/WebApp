@@ -20,5 +20,13 @@ session_start();
     <input type="submit" value="Upload" name="ok" />
 </form>
 
+@if ( $errors->any() )
+    <ul>
+      @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul> 
+  @endif
+
 </html>
 @stop

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 use App\Http\Requests;
  
@@ -18,6 +19,15 @@ use App\khoa;
 
 use Excel;
 
+use App\Http\Requests\CheckCreateRequest;
+use App\Http\Requests\CheckCtdtRequest;
+use App\Http\Requests\CheckKhoahocRequest;
+use App\Http\Requests\CheckLinhvucRequest;
+use App\Http\Requests\CheckSearchRequest;
+use App\Http\Requests\CheckSigninRequest;
+use App\Http\Requests\CheckUpdateRequest;
+use App\Http\Requests\CheckUploadRequest;
+
 
 class dtbController extends Controller
 {
@@ -25,20 +35,23 @@ class dtbController extends Controller
       return view('signin');
     }
 
-    public function checkSignin() {
+    public function checkSignin(CheckSigninRequest $request) {
       include "C:/xampp/htdocs/web/resources/views/md5.php";
-      $name = $_POST['name'];
-      $tai_khoan = tai_khoan::where('username', $name)->first();
+      $du_lieu_tu_input = $request->all();
 
+      $name = $du_lieu_tu_input['name'];
+      $tai_khoan = tai_khoan::where('username', $name)->first();
+      
       if($tai_khoan == NULL || $tai_khoan->activated == 0) {
         return view('signin');
       }
 
-      $password = encryptIt($_POST['password']);
+      $password = encryptIt($du_lieu_tu_input['password']);
+
       if($tai_khoan->password == $password && $tai_khoan->activated == 1) {
         session(['userid' => $tai_khoan->id]);
       } 
-
+    
       return view('welcome');
     }
 
@@ -129,15 +142,15 @@ class dtbController extends Controller
           "khoa_array"=>$khoa_array]);
     }
 
-    public function store(Request $request)
+    public function store(CheckCreateRequest $request)
     {
         $du_lieu_tu_input = $request->all();
-        var_dump($du_lieu_tu_input);
         
         $tai_khoan = new tai_khoan;
         
         include "C:/xampp/htdocs/web/resources/views/sendMail.php";
-        $password = rand_string(8);
+        // $password = rand_string(8);
+        $password = "abcd";
         $encryptedPass = encryptIt($password);
 
         $tai_khoan->username = $du_lieu_tu_input["ma"];
@@ -151,27 +164,27 @@ class dtbController extends Controller
         sm($du_lieu_tu_input["email"]);
 
         //tạo thông tin
-        if($du_lieu_tu_input["loai_tai_khoan"] == "giang_vien") {
-          $giang_vien = new giang_vien;
+        // if($du_lieu_tu_input["loai_tai_khoan"] == "giang_vien") {
+        //   $giang_vien = new giang_vien;
 
-          $bo_mon = bo_mon::where('ten', '=', $du_lieu_tu_input['don_vi'])->first();
+        //   $bo_mon = bo_mon::where('ten', '=', $du_lieu_tu_input['don_vi'])->first();
 
-          $giang_vien->id_bo_mon = $bo_mon->id;
-          $giang_vien->id = $tai_khoan->id;                    
-          $giang_vien->save();
-        }
+        //   $giang_vien->id_bo_mon = $bo_mon->id;
+        //   $giang_vien->id = $tai_khoan->id;                    
+        //   $giang_vien->save();
+        // }
 
-        if($du_lieu_tu_input["loai_tai_khoan"] == "sinh_vien") {
-          $sinh_vien = new sinh_vien;
-          $khoa = khoa::where('name', '=', $du_lieu_tu_input['khoa'])->first();
-          $sinh_vien->id = $tai_khoan->id;
-          $sinh_vien->id_khoa = $khoa->id;  
-          $sinh_vien->khoa_hoc = $du_lieu_tu_input["khoa_hoc"];
-          $sinh_vien->ctdt = $du_lieu_tu_input["ctdt"];
-          $sinh_vien->id_de_tai =1;
+        // if($du_lieu_tu_input["loai_tai_khoan"] == "sinh_vien") {
+        //   $sinh_vien = new sinh_vien;
+        //   $khoa = khoa::where('name', '=', $du_lieu_tu_input['khoa'])->first();
+        //   $sinh_vien->id = $tai_khoan->id;
+        //   $sinh_vien->id_khoa = $khoa->id;  
+        //   $sinh_vien->khoa_hoc = $du_lieu_tu_input["khoa_hoc"];
+        //   $sinh_vien->ctdt = $du_lieu_tu_input["ctdt"];
+        //   $sinh_vien->id_de_tai =1;
                               
-          $sinh_vien->save();
-        }
+        //   $sinh_vien->save();
+        // }
         
         return view('welcome');
     }
@@ -204,9 +217,9 @@ class dtbController extends Controller
         ]);
     }
 
-    public function excelSend() {
+    public function excelSend(CheckUploadRequest $request) {
       include "C:/xampp/htdocs/web/resources/views/sendMail.php";
-  
+      $du_lieu_tu_input = $request->all();
           if($_FILES['file']['name'] != NULL){ // Đã chọn file
                // Tiến hành code upload file
             if($_FILES['file']['type'] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){
@@ -302,15 +315,13 @@ class dtbController extends Controller
     public function cap_nhat_linh_vuc(Request $request) {
       $du_lieu_tu_input = $request->all();
 
-      // if($du_lieu_tu_input['huong_nghien_cuu'] != "") {
-      //   $giang_vien = giang_vien::where('id', '=', session('userid'))->first();
-      //   $giang_vien->huong_nghien_cuu = $du_lieu_tu_input['huong_nghien_cuu'];
-      //   $giang_vien->save();
-      // }
+      if($du_lieu_tu_input['huong_nghien_cuu'] != "") {
+        $giang_vien = giang_vien::where('id', '=', session('userid'))->first();
+        $giang_vien->huong_nghien_cuu = $du_lieu_tu_input['huong_nghien_cuu'];
+        $giang_vien->save();
+      }
 
       foreach($du_lieu_tu_input as $x => $x_value) {
-          echo "Key=" . $x . ", Value=" . $x_value;
-          echo "<br>";
 
           if($x_value != "") {
             $linh_vuc_has_giang_vien = new linh_vuc_has_giang_vien;
@@ -325,14 +336,149 @@ class dtbController extends Controller
     }
 
     public function search() {
-      // $don_vis = don_vi::all();
-       $giang_viens = giang_vien::all();
-       $linh_vucs = linh_vuc::all();
+      $bo_mons = bo_mon::all();
+      $linh_vucs = linh_vuc::all();
+
+      $bo_mon_array = array();
+      $linh_vuc_array = array();
+
+       $bo_mon_array[""] = "null";
+       $linh_vuc_array[""] = "null";
+
+        foreach($bo_mons as $x => $x_value) {
+          $bo_mon_array[$x_value["ten"]] = $x_value["ten"];
+        }
+
+         foreach($linh_vucs as $x => $x_value) {
+          $linh_vuc_array[$x_value["ten"]] = $x_value["ten"];
+        }
+
+
       return view('search')->with([
-        // 'don_vis' => $don_vis,
-        'giang_viens' => $giang_viens,
-        'linh_vucs' => $linh_vucs,
+        'bo_mon_array' => $bo_mon_array,
+        'linh_vuc_array' => $linh_vuc_array,
       ]);
     }
 
+    public function show(Request $request) {
+      // $bo_mons = bo_mon::all();
+      // $linh_vucs = linh_vuc::all();
+
+      // $bo_mon_array = array();
+      // $linh_vuc_array = array();
+
+      // $bo_mon_array[""] = "null";
+      // $linh_vuc_array[""] = "null";
+
+      //   foreach($bo_mons as $x => $x_value) {
+      //     $bo_mon_array[$x_value["ten"]] = $x_value["ten"];
+      //   }
+
+      //    foreach($linh_vucs as $x => $x_value) {
+      //     $linh_vuc_array[$x_value["ten"]] = $x_value["ten"];
+      //   }
+
+      $du_lieu_tu_input = $request->all();
+      
+      //danh sach giang vien thoa man trong bang giang_vien
+      $gvs;
+
+      $tk = tai_khoan::where("ten_rieng" , $du_lieu_tu_input['giang_vien'])->get();
+      $tk_id_arr = array();
+      for($i = 0; $i < count($tk); $i++) {
+          array_push($tk_id_arr, $tk[$i]->id);
+      }
+
+      $bm = bo_mon::where("ten" , $du_lieu_tu_input['bo_mon'])->first();
+
+      $lv = linh_vuc::where("ten" , $du_lieu_tu_input['linh_vuc'])->first();
+      
+      $lvhgv = linh_vuc_has_giang_vien::where("id_linh_vuc" , $lv->id)->get();
+      
+      $lvhgv_id_arr = array();
+      for($i = 0; $i < count($lvhgv); $i++) {
+          array_push($lvhgv_id_arr, $lvhgv[$i]->id);
+      }
+      
+
+
+      if($du_lieu_tu_input['giang_vien'] != "") {
+        $gvs = giang_vien::whereIn('id', $tk_id_arr)->get();
+
+        if($du_lieu_tu_input['bo_mon'] != "") {
+          $gvs = giang_vien::where('id', $tk_id_arr)
+          ->whereIn('id_bo_mon', $bm->id)->get();
+        }       
+      }
+      else if($du_lieu_tu_input['bo_mon'] != "") {
+        $gvs = giang_vien::where('id_bo_mon', $bm->id)->get();
+      }
+
+      if($du_lieu_tu_input['linh_vuc'] != "") {
+        $gvs = giang_vien::whereIn('id', $lvhgv_id_arr)->get();
+
+        if($du_lieu_tu_input['cdnc'] != "") {
+          $gvs = giang_vien::whereIn('id', $lvhgv_id_arr)
+          ->where('huong_nghien_cuu', 'like', '%' .$du_lieu_tu_input['cdnc']. '%')->get();
+        }       
+      }
+      else if($du_lieu_tu_input['cdnc'] != "") {
+        $gvs = giang_vien::where('huong_nghien_cuu', 'like', '%' .$du_lieu_tu_input['cdnc']. '%')->get();
+      }
+
+      $infos = array();
+      //tu danh sach giang vien thoa man  =>  thong tin ve giang vien
+      foreach ($gvs as $key => $value) {
+        $tai_khoan = tai_khoan::where('id', $value['id'])->first;
+        $infos[$key]->ten_rieng = $tai_khoan->ten_rieng;
+        $infos[$key]->email = $tai_khoan->email;
+        $infos[$key]->huong_nghien_cuu = $value['huong_nghien_cuu'];
+      }
+
+      return view('show')->with("infos", $infos);
+    }
+
+    public function nhap_khoa_hoc(){
+      return view('nhap_khoa_hoc');
+    }
+
+    public function cap_nhat_khoa_hoc(CheckKhoahocRequest $request){
+      $du_lieu_tu_input = $request->all();
+      $data = explode(',',$du_lieu_tu_input['khoa_hoc']);
+
+      for($i = 0; $i < count($data); $i++) {
+        $khoa_hoc = new khoa_hoc;
+        $khoa_hoc->khoa_hoc = $data[$i];
+        $khoa_hoc->save();
+      }
+
+      return view('nhap_khoa_hoc');
+    }
+
+    public function nhap_ctdt(){
+      return view('nhap_ctdt');
+    }
+
+    public function cap_nhat_ctdt(CheckCtdtRequest $request){
+      $du_lieu_tu_input = $request->all();
+      $data = explode(',',$du_lieu_tu_input['chuong_trinh']);
+
+      for($i = 0; $i < count($data); $i++) {
+        $chuong_trinh = new chuong_trinh;
+        $chuong_trinh->chuong_trinh = $data[$i];
+        $chuong_trinh->save();
+      }
+
+      return view('nhap_ctdt');
+    }
+
+    public function getTest(){
+      return view('test');
+    }
+
+    public function postTest(Request $request){
+      $content=$request->get('loai_tai_khoan');
+
+      echo view('test');
+    }
 }
